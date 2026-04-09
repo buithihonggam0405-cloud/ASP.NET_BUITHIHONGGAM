@@ -10,4 +10,6 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Student> Students { get; set; }
+    // them course
+    public DbSet<Course> Courses { get; set; }
 }

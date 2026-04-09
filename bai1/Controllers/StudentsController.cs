@@ -44,6 +44,25 @@ public class StudentsController : ControllerBase
 
         return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, student);
     }
+    [HttpGet("advanced")]
+    public async Task<IActionResult> Advanced(string keyword, int page = 1)
+    {
+        int pageSize = 5;
+
+        var query = _context.Students.AsQueryable();
+
+        if (!string.IsNullOrEmpty(keyword))
+        {
+            query = query.Where(s => s.FullName.Contains(keyword));
+        }
+
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return Ok(result);
+    }
 
     // PUT: api/Students/5
     [HttpPut("{id}")]
@@ -71,5 +90,33 @@ public class StudentsController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    // SEARCH
+    [HttpGet("search")]
+    public async Task<IActionResult> Search(string keyword)
+    {
+        var result = await _context.Students
+            .Where(s => s.FullName.Contains(keyword))
+            .ToListAsync();
+
+        return Ok(result);
+    }
+    // sắp xếp
+    [HttpGet("sort")]
+    public async Task<IActionResult> Sort(string type)
+    {
+        var data = _context.Students.AsQueryable();
+
+        if (type == "name")
+        {
+            data = data.OrderBy(s => s.FullName);
+        }
+        else if (type == "date")
+        {
+            data = data.OrderBy(s => s.Birthday);
+        }
+
+        return Ok(await data.ToListAsync());
     }
 }
